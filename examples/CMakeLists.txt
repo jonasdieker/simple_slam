@@ -1,0 +1,2 @@
+add_executable(vis_data vis_data.cpp)
+target_link_libraries(vis_data PRIVATE data_loader)
