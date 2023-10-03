@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <optional>
 
 #include "opencv2/opencv.hpp"
 
@@ -11,7 +12,8 @@ class DataLoader{
 public:
     explicit DataLoader(const std::string &data_dir);
     cv::Mat get_cam_matrix();
-    std::pair<cv::Mat, cv::Mat> get_data(int index);
+    std::optional<cv::Mat> get_gt(int index);
+    std::optional<std::pair<cv::Mat, cv::Mat>> get_image_pair(int index);
 
 private:
     void read_cam_matrix(const std::string &calib_file_name);

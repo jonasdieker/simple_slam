@@ -88,20 +88,11 @@ void DataLoader::load_img_paths(const std::string &img_dir)
 
 cv::Mat DataLoader::get_image(int index)
 {
-    if (index >= static_cast<int>(img_paths_.size())) {
-        std::cerr << "Index out of range: " << index << std::endl;
-        return cv::Mat{};
-    }
-    cv::Mat img = cv::imread(img_paths_[index]);
-    return img;
+    return cv::imread(img_paths_[index]);
 }
 
 cv::Mat DataLoader::get_gt_pose(int index)
 {
-    if (index >= static_cast<int>(gt_poses_.size())) {
-        std::cerr << "Index out of range: " << index << std::endl;
-        return cv::Mat{};
-    }
     return gt_poses_[index];
 }
 
@@ -110,7 +101,26 @@ cv::Mat DataLoader::get_cam_matrix()
     return P_;
 }
 
-std::pair<cv::Mat, cv::Mat> DataLoader::get_data(int index)
+std::optional<cv::Mat> DataLoader::get_gt(int index)
 {
-    return {get_image(index), get_gt_pose(index)};
+    if (index < static_cast<int>(gt_poses_.size())-1) {
+        cv::Mat pose1{get_gt_pose(index)};
+        cv::Mat pose2{get_gt_pose(index+1)};
+        return pose2 - pose1;
+    } else {
+        std::cerr << "Invalid index: " << index << std::endl;
+        return std::nullopt;
+    }
+}
+
+std::optional<std::pair<cv::Mat, cv::Mat>> DataLoader::get_image_pair(int index)
+{
+    if (index < static_cast<int>(img_paths_.size())-1) {
+        cv::Mat img1{get_image(index)};
+        cv::Mat img2{get_image(index + 1)};
+        return std::make_pair(img1, img2);
+    } else {
+        std::cerr << "Invalid index: " << index << std::endl;
+        return std::nullopt;
+    }
 }

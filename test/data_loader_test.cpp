@@ -10,4 +10,7 @@ TEST(DataLoaderTest, Initialize)
     DataLoader data_loader{total_path};
     EXPECT_EQ(data_loader.get_cam_matrix().rows, 3);
     EXPECT_EQ(data_loader.get_cam_matrix().cols, 4);
+    EXPECT_EQ(data_loader.get_image_pair(0).has_value(), true);
+    EXPECT_EQ(data_loader.get_image_pair(100000).has_value(), false);
+
 }
