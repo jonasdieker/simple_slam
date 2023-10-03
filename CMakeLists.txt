@@ -15,11 +15,11 @@ target_compile_options(cxx_setup INTERFACE -Wall -Wpedantic -Wextra)
 target_compile_features(cxx_setup INTERFACE cxx_std_17)
 target_include_directories(cxx_setup INTERFACE ${PROJECT_SOURCE_DIR})
 
-# # Update the submodules here
-# include(external/UpdateSubmodules.cmake)
+# Update the submodules here
+include(external/UpdateSubmodules.cmake)
 
-# # Enable testing for this project
-# include(CTest)
+# Enable testing for this project
+include(CTest)
 
 find_package(OpenCV REQUIRED)
 find_package(Boost COMPONENTS system REQUIRED)
@@ -33,6 +33,7 @@ add_definitions(
 )
 
 # Add subdirectories
-# add_subdirectory(external)
+add_subdirectory(external)
 add_subdirectory(${PROJECT_NAME})
+add_subdirectory(test)
 add_subdirectory(examples)

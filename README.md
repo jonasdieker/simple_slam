@@ -12,6 +12,10 @@ The KITTI data contains loop closures which can be used to close the factor grap
 
 This map could then be used downstream to plan new paths in the environment.
 
+## Data
+
+Place the image sequence in `data/` directory under the root of this project.
+
 ## Build
 
 ```
