@@ -6,8 +6,6 @@ DataLoader::DataLoader(const std::string &data_dir) : data_dir_(data_dir) {
   read_cam_matrix(data_dir + "calib.txt");
   read_ground_truth_poses(data_dir + "00.txt");
   load_img_paths(data_dir + "image_2");
-
-  std::cout << img_paths_[0] << " " << img_paths_[1] << std::endl;
 }
 
 void DataLoader::read_cam_matrix(const std::string &calib_file_name) {
@@ -108,6 +106,8 @@ std::optional<cv::Mat> DataLoader::get_gt(int index) {
 std::optional<std::pair<cv::Mat, cv::Mat>> DataLoader::get_image_pair(
     int index) {
   if (index < static_cast<int>(img_paths_.size()) - 1) {
+    // std::cout << img_paths_[index] << " " << img_paths_[index + 1] <<
+    // std::endl;
     cv::Mat img1{get_image(index)};
     cv::Mat img2{get_image(index + 1)};
     return std::make_pair(img1, img2);
