@@ -1,26 +1,22 @@
 #pragma once
+#include <optional>
+#include <utility>
+#include <vector>
 
-#include "data_loader.hpp"
+#include "opencv2/opencv.hpp"
 
 // Define a type alias for a map of features (key points)
-using Features = std::pair<std::vector<cv::KeyPoint>, std::vector<cv::KeyPoint>>;
-using Map = std::vector<Features>;
-
+using Features =
+    std::pair<std::vector<cv::KeyPoint>, std::vector<cv::KeyPoint>>;
 
 class VisualOdometry {
-public:
-    explicit VisualOdometry(const std::string &data_dir);
-    void run_vo_pipeline();
+ public:
+  explicit VisualOdometry(const cv::Mat &cam_matrix);
+  std::optional<std::pair<Features, cv::Mat>> get_relative_pose(
+      const cv::Mat &frame2, const cv::Mat &frame1);
 
-private:
-    std::vector<cv::Point2f> extract_features(const cv::Mat &img);
-    Features get_matched_features(const cv::Mat &img1, const cv::Mat &img2);
-    double get_scale(int index);
-
-    // data
-    DataLoader data_loader_;
-    cv::Mat cam_matrix_;
-    std::vector<cv::Mat> gt_poses_;
-    std::vector<cv::Mat> pred_poses_;
-    Map map_;
+ private:
+  Features get_matched_features(const cv::Mat &img1, const cv::Mat &img2);
+  double get_scale(const cv::Mat prev_pose, const cv::Mat cur_pose);
+  cv::Mat cam_matrix_;
 };
