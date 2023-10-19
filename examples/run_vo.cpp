@@ -21,32 +21,41 @@ int main() {
     cv::Mat frame1 = image_pair.value().first;
     cv::Mat frame2 = image_pair.value().second;
 
-    std::cout << "test_before_vo" << std::endl;
+    int vo_success = visual_odometry.process_frames(frame2, frame1);
 
-    auto features_pose = visual_odometry.get_relative_pose(frame2, frame1);
+    // if (!vo_success) {
+    //   std::cout << "no features/pose returned!" << std::endl;
+    //   return 1;
+    // }
 
-    std::cout << "test" << std::endl;
+    cv::Mat relative_pose = visual_odometry.get_relative_pose();
+    Features features = visual_odometry.get_features();
 
-    if (!features_pose.has_value()) {
-      std::cout << "no value returned!" << std::endl;
-      return 1;
-    }
+    std::cout << features.first.size() << " " << features.second.size()
+              << std::endl;
 
-    cv::Mat relative_pose = features_pose.value().second;
-    Features features = features_pose.value().first;
+    std::cout << relative_pose << std::endl;
 
-    std::cout << typeid(features).name() << std::endl;
-
-    // std::cout << relative_pose << std::endl;
-
-    // // update visualisation
+    // update visualisation
     // visualiser.update_features(frame1, frame2, features);
     // // visualiser.update_map(relative_pose)
 
-    // // update data loader
-    // data_loader.get_image_pair(++idx);
+    for (const auto &pt : features.first) {
+      cv::circle(frame1, pt.pt, 2, cv::viz::Color::yellow(), -1);
+    }
+    cv::imshow("Features", frame1);
+    cv::waitKey(0);
 
-    // break;
+    for (const auto &pt : features.second) {
+      cv::circle(frame2, pt.pt, 2, cv::viz::Color::yellow(), -1);
+    }
+    cv::imshow("Features", frame2);
+    cv::waitKey(0);
+
+    // update data loader
+    data_loader.get_image_pair(++idx);
+
+    break;
   }
 
   return 0;
