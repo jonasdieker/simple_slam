@@ -8,7 +8,7 @@ Features VisualOdometry::get_matched_features(const cv::Mat &img1,
   std::vector<cv::KeyPoint> keypts1, keypts2;
   cv::Mat descriptors1, descriptors2;
 
-  cv::Ptr<cv::ORB> orb = cv::ORB::create();
+  cv::Ptr<cv::ORB> orb = cv::ORB::create(5000);
   orb->detectAndCompute(img1, cv::Mat(), keypts1, descriptors1);
   orb->detectAndCompute(img2, cv::Mat(), keypts2, descriptors2);
 
@@ -59,38 +59,38 @@ double VisualOdometry::get_scale(const cv::Mat prev_pose,
   return scale;
 }
 
-std::optional<std::pair<Features, cv::Mat>> VisualOdometry::get_relative_pose(
-    const cv::Mat &frame2, const cv::Mat &frame1) {
+int VisualOdometry::process_frames(const cv::Mat &frame2,
+                                   const cv::Mat &frame1) {
   // if images are RGB -> Grayscale
-  if (frame1.channels() > 1) {
-    cv::cvtColor(frame1, frame1, cv::COLOR_BGR2GRAY);
-  }
-  if (frame2.channels() > 1) {
-    cv::cvtColor(frame2, frame2, cv::COLOR_BGR2GRAY);
-  }
+  cv::Mat frame1_gc;
+  cv::Mat frame2_gc;
+  cv::cvtColor(frame1, frame1_gc, cv::COLOR_BGR2GRAY);
+  cv::cvtColor(frame2, frame2_gc, cv::COLOR_BGR2GRAY);
 
   // get matched features
-  Features features{get_matched_features(frame1, frame2)};
+  features_ = get_matched_features(frame1_gc, frame2_gc);
 
   std::vector<cv::Point2f> pts1, pts2;
 
-  for (std::size_t i = 1; i < features.first.size(); ++i) {
-    pts1.push_back(features.first[i].pt);
-    pts2.push_back(features.second[i].pt);
+  for (std::size_t i = 1; i < features_.first.size(); ++i) {
+    pts1.push_back(features_.first[i].pt);
+    pts2.push_back(features_.second[i].pt);
   }
 
   // compute essential matrix
-  cv::Mat E =
-      cv::findEssentialMat(pts2, pts1, cam_matrix_, cv::RANSAC, 0.999, 1.0);
+  cv::Mat E_mask;
+  E_mask.convertTo(E_mask, CV_64F);
+  E_ = cv::findEssentialMat(
+      pts2, pts1, cam_matrix_, cv::RANSAC, 0.999, 1.0, E_mask);
 
-  if (E.empty()) {
+  if (E_.empty()) {
     std::cerr << "Error: Unable to compute essential matrix. \n";
-    return std::nullopt;
+    return 0;
   }
 
   // extract pose
   cv::Mat R, t;
-  int inlier_cnt = cv::recoverPose(E, pts2, pts1, cam_matrix_, R, t);
+  int inlier_cnt = cv::recoverPose(E_, pts2, pts1, cam_matrix_, R, t);
 
   std::cout << inlier_cnt << std::endl;
 
@@ -98,7 +98,10 @@ std::optional<std::pair<Features, cv::Mat>> VisualOdometry::get_relative_pose(
   cv::Mat T;
   cv::Mat bottom_row = cv::Mat(1, 4, CV_64F, {0, 0, 0, 1});
   cv::hconcat(R, t, T);
-  cv::vconcat(T, bottom_row, T);
-
-  return std::make_pair(features, T);
+  cv::vconcat(T, bottom_row, T_);
+  return 1;
 }
+
+Features VisualOdometry::get_features() { return features_; }
+
+cv::Mat VisualOdometry::get_relative_pose() { return T_; }
