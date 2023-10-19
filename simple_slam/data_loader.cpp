@@ -1,10 +1,13 @@
 #include "data_loader.hpp"
+#include <algorithm>
 #include <filesystem>
 
 DataLoader::DataLoader(const std::string &data_dir) : data_dir_(data_dir) {
   read_cam_matrix(data_dir + "calib.txt");
   read_ground_truth_poses(data_dir + "00.txt");
   load_img_paths(data_dir + "image_2");
+
+  std::cout << img_paths_[0] << " " << img_paths_[1] << std::endl;
 }
 
 void DataLoader::read_cam_matrix(const std::string &calib_file_name) {
@@ -38,8 +41,8 @@ void DataLoader::read_cam_matrix(const std::string &calib_file_name) {
 
   P_ = P_(rowRange, colRange);
 
-  std::cout << "Projection Matrix Size: " << P_.size() << std::endl;
-  std::cout << "Projection Matrix: " << P_ << std::endl;
+  // std::cout << "Projection Matrix Size: " << P_.size() << std::endl;
+  // std::cout << "Projection Matrix: " << P_ << std::endl;
 }
 
 void DataLoader::read_ground_truth_poses(const std::string &gt_file_name) {
@@ -80,6 +83,7 @@ void DataLoader::load_img_paths(const std::string &img_dir) {
   } catch (const std::filesystem::filesystem_error &e) {
     std::cerr << "Error accessing the directory: " << e.what() << std::endl;
   }
+  std::sort(img_paths_.begin(), img_paths_.end());
 }
 
 cv::Mat DataLoader::get_image(int index) {
