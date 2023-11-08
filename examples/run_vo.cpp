@@ -23,10 +23,10 @@ int main() {
 
     int vo_success = visual_odometry.process_frames(frame2, frame1);
 
-    // if (!vo_success) {
-    //   std::cout << "no features/pose returned!" << std::endl;
-    //   return 1;
-    // }
+    if (!vo_success) {
+      std::cout << "no features/pose returned!" << std::endl;
+      return 1;
+    }
 
     cv::Mat relative_pose = visual_odometry.get_relative_pose();
     Features features = visual_odometry.get_features();
@@ -37,25 +37,15 @@ int main() {
     std::cout << relative_pose << std::endl;
 
     // update visualisation
-    // visualiser.update_features(frame1, frame2, features);
+    visualiser.update_features(frame1, features);
     // // visualiser.update_map(relative_pose)
 
-    for (const auto &pt : features.first) {
-      cv::circle(frame1, pt.pt, 2, cv::viz::Color::yellow(), -1);
-    }
-    cv::imshow("Features", frame1);
-    cv::waitKey(0);
-
-    for (const auto &pt : features.second) {
-      cv::circle(frame2, pt.pt, 2, cv::viz::Color::yellow(), -1);
-    }
-    cv::imshow("Features", frame2);
-    cv::waitKey(0);
-
     // update data loader
-    data_loader.get_image_pair(++idx);
+    auto image_pair = data_loader.get_image_pair(++idx);
 
-    break;
+    if (idx == 100) {
+      break;
+    }
   }
 
   return 0;
