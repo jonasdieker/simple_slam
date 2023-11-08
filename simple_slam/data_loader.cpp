@@ -34,13 +34,10 @@ void DataLoader::read_cam_matrix(const std::string &calib_file_name) {
   P_ = cv::Mat(values).reshape(0, 3);
   P_.convertTo(P_, CV_64F);
 
-  cv::Range rowRange(0, 3);
-  cv::Range colRange(0, 3);
+  cv::decomposeProjectionMatrix(P_, K_, R_, t_);
 
-  P_ = P_(rowRange, colRange);
-
-  // std::cout << "Projection Matrix Size: " << P_.size() << std::endl;
   // std::cout << "Projection Matrix: " << P_ << std::endl;
+  // std::cout << "Camera Matrix: " << K_ << std::endl;
 }
 
 void DataLoader::read_ground_truth_poses(const std::string &gt_file_name) {
@@ -90,7 +87,7 @@ cv::Mat DataLoader::get_image(int index) {
 
 cv::Mat DataLoader::get_gt_pose(int index) { return gt_poses_[index]; }
 
-cv::Mat DataLoader::get_cam_matrix() { return P_; }
+cv::Mat DataLoader::get_cam_matrix() { return K_; }
 
 std::optional<cv::Mat> DataLoader::get_gt(int index) {
   if (index < static_cast<int>(gt_poses_.size()) - 1) {
@@ -106,8 +103,8 @@ std::optional<cv::Mat> DataLoader::get_gt(int index) {
 std::optional<std::pair<cv::Mat, cv::Mat>> DataLoader::get_image_pair(
     int index) {
   if (index < static_cast<int>(img_paths_.size()) - 1) {
-    // std::cout << img_paths_[index] << " " << img_paths_[index + 1] <<
-    // std::endl;
+    std::cout << img_paths_[index] << " " << img_paths_[index + 1] <<
+    std::endl;
     cv::Mat img1{get_image(index)};
     cv::Mat img2{get_image(index + 1)};
     return std::make_pair(img1, img2);

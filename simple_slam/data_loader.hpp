@@ -26,4 +26,7 @@ class DataLoader {
   std::vector<cv::Mat> gt_poses_{};
   std::vector<std::string> img_paths_{};
   cv::Mat P_{};
+  cv::Mat K_{};
+  cv::Mat R_{};
+  cv::Mat t_{};
 };
