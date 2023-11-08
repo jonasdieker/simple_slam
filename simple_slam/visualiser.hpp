@@ -9,11 +9,11 @@ using Features =
     std::pair<std::vector<cv::KeyPoint>, std::vector<cv::KeyPoint>>;
 
 class Visualiser {
- public:
+public:
+  Visualiser();
   void update_features(const cv::Mat &frame1,
-                       const cv::Mat &frame2,
                        const Features &features);
   void update_map();
 
- private:
+private:
 };
