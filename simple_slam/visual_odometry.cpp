@@ -90,9 +90,7 @@ int VisualOdometry::process_frames(const cv::Mat &frame2,
 
   // extract pose
   cv::Mat R, t;
-  int inlier_cnt = cv::recoverPose(E_, pts2, pts1, cam_matrix_, R, t);
-
-  std::cout << inlier_cnt << std::endl;
+  cv::recoverPose(E_, pts2, pts1, cam_matrix_, R, t);
 
   // assemble homogeneous transformation matrix
   cv::Mat T;
